@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <unistd.h>
 
+// this filesystem works with my compiler:
 #include <filesystem>
 #include <iostream>
 #include <numeric>
@@ -55,22 +56,29 @@ string LinuxParser::Kernel() {
 // BONUS: Update this to use std::filesystem
 vector<int> LinuxParser::Pids() {
   vector<int> pids;
-  // DIR* directory = opendir(kProcDirectory.c_str());
-  // struct dirent* file;
-  // while ((file = readdir(directory)) != nullptr) {
-  //   // Is this a directory?
-  //   if (file->d_type == DT_DIR) {
-  //     // Is every character of the name a digit?
-  //     string filename(file->d_name);
-  //     if (std::all_of(filename.begin(), filename.end(), isdigit)) {
-  //       int pid = stoi(filename);
-  //       pids.push_back(pid);
-  //     }
-  //   }
-  // }
-  // closedir(directory);
-  // return pids;
 
+  // implementation wo filesystem:
+  //------------------------------
+  /*
+    DIR* directory = opendir(kProcDirectory.c_str());
+    struct dirent* file;
+    while ((file = readdir(directory)) != nullptr) {
+      // Is this a directory?
+      if (file->d_type == DT_DIR) {
+        // Is every character of the name a digit?
+        string filename(file->d_name);
+        if (std::all_of(filename.begin(), filename.end(), isdigit)) {
+          int pid = stoi(filename);
+          pids.push_back(pid);
+        }
+      }
+    }
+    closedir(directory);
+    return pids;
+  */
+
+  // implementation with filesystem:
+  //--------------------------------
   for (const auto& dir_entry :
        std::filesystem::directory_iterator((kProcDirectory.c_str()))) {
     // Is this a directory?
@@ -146,6 +154,10 @@ long LinuxParser::ActiveJiffies(int pid) {
 
 // TODO: Read and return the number of active jiffies for the system
 long LinuxParser::ActiveJiffies() {
+  // I don't know why this implementation doesn't work
+  // I tried to stock all values in a vector and add them up
+  // to get total Jiffies. Any ideas?
+  //---------------------------------------------------------
   // vector<int> all_values;
   // int value;
   // string key, line;
@@ -164,6 +176,8 @@ long LinuxParser::ActiveJiffies() {
   // }
   // return (std::accumulate(all_values.begin(), all_values.end(),
   //                         decltype(all_values)::value_type(0)));
+
+  // This code works:
   long active{0};
   string user, nice, system, irq, softirq, steal, other, key, line;
   std::ifstream filestream(kProcDirectory + kStatFilename);
@@ -198,22 +212,29 @@ long LinuxParser::ActiveJiffies() {
 
 // TODO: Read and return the number of idle jiffies for the system
 long LinuxParser::IdleJiffies() {
-  // vector<int> all_values;
-  // int value;
-  // string key, line;
-  // std::ifstream filestream(kProcDirectory + kStatFilename);
-  // if (filestream.is_open()) {
-  //   while (std::getline(filestream, line)) {
-  //     std::istringstream linestream(line);
-  //     while (linestream >> key) {
-  //       if (key == "cpu") {
-  //         all_values.push_back(value);
-  //         return (all_values[3] + all_values[4]);
-  //       }
-  //     }
-  //   }
-  // }
-  // return (all_values[3] + all_values[4]);
+  // Same as ActiveJiffies(), I don't know why this implementation
+  // doesn't work. Any ideas?
+  //---------------------------------------------------------
+  /*
+    vector<int> all_values;
+    int value;
+    string key, line;
+    std::ifstream filestream(kProcDirectory + kStatFilename);
+    if (filestream.is_open()) {
+      while (std::getline(filestream, line)) {
+        std::istringstream linestream(line);
+        while (linestream >> key) {
+          if (key == "cpu") {
+            all_values.push_back(value);
+            return (all_values[3] + all_values[4]);
+          }
+        }
+      }
+    }
+    return (all_values[3] + all_values[4]);
+  */
+
+  // This code works:
   long inactive{0};
   string idle, iowait, other, key, line;
   std::ifstream filestream(kProcDirectory + kStatFilename);
