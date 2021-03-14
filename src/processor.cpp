@@ -1,23 +1,23 @@
 #include "processor.h"
-#include "linux_parser.h"
 
 #include <cmath>
+
+#include "linux_parser.h"
 
 using std::abs;
 
 // TODO: Return the aggregate CPU utilization
 float Processor::Utilization() {
-  float idle = LinuxParser::IdleJiffies();
-  float total = LinuxParser::ActiveJiffies();
-  float d_idle = abs(idle - idle_p);
-  float d_total = abs(total - total_p);
+  const float idle = LinuxParser::IdleJiffies();
+  const float active = LinuxParser::ActiveJiffies();
+  const float d_idle = abs(idle - idle_p);
+  const float d_active = abs(active - active_p);
 
-  if (total > 0.f) {
+  if (active + idle > 0.f) {
     idle_p = idle;
-    total_p = total;
-    //return active / (active + idle);
-    return (d_total - d_idle) / d_total;
-  }
-  else
+    active_p = active;
+    // return active / (active + idle);
+    return d_active / (d_active + d_idle);
+  } else
     return 0.f;
 }

@@ -10,6 +10,7 @@
 #include <vector>
 
 using std::stof;
+using std::stoi;
 using std::string;
 using std::to_string;
 using std::vector;
@@ -133,44 +134,95 @@ long LinuxParser::ActiveJiffies(int pid) {
 
 // TODO: Read and return the number of active jiffies for the system
 long LinuxParser::ActiveJiffies() {
-  vector<int> all_values;
-  int value;
-  string key, line;
+  // vector<int> all_values;
+  // int value;
+  // string key, line;
+  // std::ifstream filestream(kProcDirectory + kStatFilename);
+  // if (filestream.is_open()) {
+  //   while (std::getline(filestream, line)) {
+  //     std::istringstream linestream(line);
+  //     while (linestream >> key) {
+  //       if (key == "cpu") {
+  //         all_values.push_back(value);
+  //         return (std::accumulate(all_values.begin(), all_values.end(),
+  //                                 decltype(all_values)::value_type(0)));
+  //       }
+  //     }
+  //   }
+  // }
+  // return (std::accumulate(all_values.begin(), all_values.end(),
+  //                         decltype(all_values)::value_type(0)));
+  long active{0};
+  string user, nice, system, irq, softirq, steal, other, key, line;
   std::ifstream filestream(kProcDirectory + kStatFilename);
   if (filestream.is_open()) {
-    while (std::getline(filestream, line)) {
-      std::istringstream linestream(line);
-      while (linestream >> key) {
-        if (key == "cpu") {
-          all_values.push_back(value);
-          return (std::accumulate(all_values.begin(), all_values.end(),
-                                  decltype(all_values)::value_type(0)));
+    std::getline(filestream, line);
+    std::istringstream linestream(line);
+    while (linestream >> key) {
+      if (key == "cpu") {
+        for (int i = 0; i <= 9; ++i) {
+          if (i == CPUStates::kUser_)
+            linestream >> user;
+          else if (i == CPUStates::kNice_)
+            linestream >> nice;
+          else if (i == CPUStates::kSystem_)
+            linestream >> system;
+          else if (i == CPUStates::kIRQ_)
+            linestream >> irq;
+          else if (i == CPUStates::kSoftIRQ_)
+            linestream >> softirq;
+          else if (i == CPUStates::kSteal_)
+            linestream >> steal;
+          else
+            linestream >> other;
         }
       }
     }
+    active = stoi(user) + stoi(nice) + stoi(system) + stoi(irq) +
+             stoi(softirq) + stoi(steal);
   }
-  return (std::accumulate(all_values.begin(), all_values.end(),
-                          decltype(all_values)::value_type(0)));
+  return active;
 }
 
 // TODO: Read and return the number of idle jiffies for the system
 long LinuxParser::IdleJiffies() {
-  vector<int> all_values;
-  int value;
-  string key, line;
+  // vector<int> all_values;
+  // int value;
+  // string key, line;
+  // std::ifstream filestream(kProcDirectory + kStatFilename);
+  // if (filestream.is_open()) {
+  //   while (std::getline(filestream, line)) {
+  //     std::istringstream linestream(line);
+  //     while (linestream >> key) {
+  //       if (key == "cpu") {
+  //         all_values.push_back(value);
+  //         return (all_values[3] + all_values[4]);
+  //       }
+  //     }
+  //   }
+  // }
+  // return (all_values[3] + all_values[4]);
+long inactive{0};
+  string idle, iowait, other, key, line;
   std::ifstream filestream(kProcDirectory + kStatFilename);
   if (filestream.is_open()) {
-    while (std::getline(filestream, line)) {
-      std::istringstream linestream(line);
-      while (linestream >> key) {
-        if (key == "cpu") {
-          all_values.push_back(value);
-          return (all_values[3] + all_values[4]);
+    std::getline(filestream, line);
+    std::istringstream linestream(line);
+    while (linestream >> key) {
+      if (key == "cpu") {
+        for (int i = 0; i <= 9; ++i) {
+          if (i == CPUStates::kIdle_)
+            linestream >> idle;
+          else if (i == CPUStates::kIOwait_)
+            linestream >> iowait;
+          else
+            linestream >> other;
         }
       }
     }
+    inactive = stoi(idle) + stoi(iowait);
   }
-  return (all_values[3] + all_values[4]);
+  return inactive;
 }
 
 // TODO: Read and return CPU utilization
