@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  cppndsystemmonitor:
+    image: cppndsystemmonitor
+    build:
+      context: .
+      dockerfile: ./Dockerfile
