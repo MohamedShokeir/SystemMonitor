@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <unistd.h>
 
+#include <filesystem>
 #include <iostream>
 #include <numeric>
 #include <sstream>
@@ -54,27 +55,38 @@ string LinuxParser::Kernel() {
 // BONUS: Update this to use std::filesystem
 vector<int> LinuxParser::Pids() {
   vector<int> pids;
-  DIR* directory = opendir(kProcDirectory.c_str());
-  struct dirent* file;
-  while ((file = readdir(directory)) != nullptr) {
+  // DIR* directory = opendir(kProcDirectory.c_str());
+  // struct dirent* file;
+  // while ((file = readdir(directory)) != nullptr) {
+  //   // Is this a directory?
+  //   if (file->d_type == DT_DIR) {
+  //     // Is every character of the name a digit?
+  //     string filename(file->d_name);
+  //     if (std::all_of(filename.begin(), filename.end(), isdigit)) {
+  //       int pid = stoi(filename);
+  //       pids.push_back(pid);
+  //     }
+  //   }
+  // }
+  // closedir(directory);
+  // return pids;
+
+  for (const auto& dir_entry :
+       std::filesystem::directory_iterator((kProcDirectory.c_str()))) {
     // Is this a directory?
-    if (file->d_type == DT_DIR) {
-      // Is every character of the name a digit?
-      string filename(file->d_name);
+    if (std::filesystem::is_directory(dir_entry)) {
+      string filename = dir_entry.path().filename().string();
       if (std::all_of(filename.begin(), filename.end(), isdigit)) {
         int pid = stoi(filename);
         pids.push_back(pid);
       }
     }
   }
-  closedir(directory);
   return pids;
 }
 
 // TODO: Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() {
-  // see:
-  // https://stackoverflow.com/questions/41224738/how-to-calculate-system-memory-usage-from-proc-meminfo-like-htop
   string line;
   string key;
   string kB;
@@ -202,7 +214,7 @@ long LinuxParser::IdleJiffies() {
   //   }
   // }
   // return (all_values[3] + all_values[4]);
-long inactive{0};
+  long inactive{0};
   string idle, iowait, other, key, line;
   std::ifstream filestream(kProcDirectory + kStatFilename);
   if (filestream.is_open()) {
