@@ -231,7 +231,7 @@ long LinuxParser::IdleJiffies() {
       }
     }
     return (all_values.at(3) + all_values.at(4));
-}  
+}
 */
   // This code works:
   long inactive{0};
@@ -337,7 +337,10 @@ string LinuxParser::Ram(int pid) {
       std::istringstream linestream(line);
       while (linestream >> key >> value) {
         if (key == "VmSize") {
-          return to_string(stoi(value) / 1000);
+          if (stoi(value))
+            return to_string(stoi(value) / 1000);
+          else
+            return to_string(0);
         }
       }
     }

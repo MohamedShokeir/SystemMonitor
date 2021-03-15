@@ -25,7 +25,8 @@ vector<Process>& System::Processes() {
   processes_.clear();
   for (const int pid : LinuxParser::Pids()) {
     Process process(pid);
-    processes_.emplace_back(process); // why does emplace_back cause a segmentation fault here?
+    processes_.emplace_back(
+        process);  // why does emplace_back cause a segmentation fault here?
   }
   std::sort(processes_.rbegin(), processes_.rend());
   return processes_;

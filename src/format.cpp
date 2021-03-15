@@ -1,7 +1,7 @@
 #include "format.h"
 
-#include <string>
 #include <iomanip>
+#include <string>
 
 using std::string;
 
@@ -14,8 +14,8 @@ string Format::ElapsedTime(long seconds) {
   const int m = (seconds % 3600) / 60;
   const int s = (seconds % 3600 % 60);
   std::ostringstream elapsedTime;
-  elapsedTime << std::setw(2) << std::setfill('0') << h 
-              << ":" << std::setw(2) << std::setfill('0') << m
-              << ":" << std::setw(2) << std::setfill('0') << s;
+  elapsedTime << std::setw(2) << std::setfill('0') << h << ":" << std::setw(2)
+              << std::setfill('0') << m << ":" << std::setw(2)
+              << std::setfill('0') << s;
   return elapsedTime.str();
- }
+}
