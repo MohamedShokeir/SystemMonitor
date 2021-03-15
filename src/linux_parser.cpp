@@ -75,6 +75,7 @@ vector<int> LinuxParser::Pids() {
     }
     closedir(directory);
     return pids;
+  }
   */
 
   // implementation with filesystem:
@@ -168,8 +169,6 @@ long LinuxParser::ActiveJiffies() {
   //     while (linestream >> key) {
   //       if (key == "cpu") {
   //         all_values.push_back(value);
-  //         return (std::accumulate(all_values.begin(), all_values.end(),
-  //                                 decltype(all_values)::value_type(0)));
   //       }
   //     }
   //   }
@@ -225,15 +224,15 @@ long LinuxParser::IdleJiffies() {
         std::istringstream linestream(line);
         while (linestream >> key) {
           if (key == "cpu") {
+            while (linestream >> value)
             all_values.push_back(value);
-            return (all_values[3] + all_values[4]);
           }
         }
       }
     }
-    return (all_values[3] + all_values[4]);
-  */
-
+    return (all_values.at(3) + all_values.at(4));
+}  
+*/
   // This code works:
   long inactive{0};
   string idle, iowait, other, key, line;
@@ -280,7 +279,7 @@ float LinuxParser::CpuUtilization(int pid) {
     float freq = sysconf(_SC_CLK_TCK);
     float total_time = utime + stime + cutime + cstime;
     float seconds = uptime - starttime;
-    cpuUtil = 100. * ((total_time / freq) / seconds);
+    cpuUtil = (total_time / freq) / seconds;
   }
   return cpuUtil;
 }
@@ -338,12 +337,12 @@ string LinuxParser::Ram(int pid) {
       std::istringstream linestream(line);
       while (linestream >> key >> value) {
         if (key == "VmSize") {
-          return value;
+          return to_string(stoi(value) / 1000);
         }
       }
     }
   }
-  return value;
+  return to_string(stoi(value) / 1000);
 }
 
 // TODO: Read and return the user ID associated with a process
